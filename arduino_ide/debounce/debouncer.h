@@ -21,7 +21,7 @@ private:
   static stance transient();
   
   // Dummy callback för att undvika nullpointer-kontroll
-  static void dummyCallback(uint8_t state) { }
+  static void dummyCallback(uint8_t state) {}
   
 public:
   static uint8_t reading;  // Publik senaste läsning för användare

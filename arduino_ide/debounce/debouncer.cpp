@@ -7,7 +7,7 @@ uint8_t Debouncer::lastReading = 0;
 uint8_t Debouncer::bounceCounter = 0;
 uint8_t Debouncer::uThresh = 10;
 uint8_t Debouncer::reading = 0;
-Debouncer::stancePointer Debouncer::currentStance = &Debouncer::stable;
+Debouncer::stancePointer Debouncer::currentStance = &Debouncer::transient;
 void (*Debouncer::onStateChangeCallback)(uint8_t) = &Debouncer::dummyCallback;
 
 Debouncer::Debouncer(volatile uint8_t* p, uint8_t m, uint8_t threshold, void (*callback)(uint8_t)) {
@@ -23,9 +23,9 @@ Debouncer::Debouncer(volatile uint8_t* p, uint8_t m, uint8_t threshold, void (*c
   TCCR2B |= (1 << CS20);    // Ingen prescaler
   TIMSK2 |= (1 << OCIE2A);  // Aktivera interrupt
   
-  lastReading = *port & mask;
-  reading = lastReading;
-  currentStance = &Debouncer::stable;
+  lastReading = 0;
+  //reading = lastReading;
+  currentStance = &Debouncer::transient;
   
   sei();
 } // Debouncer konstruktor
