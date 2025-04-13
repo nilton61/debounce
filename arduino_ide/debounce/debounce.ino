@@ -16,7 +16,7 @@ Debouncer bounce(&PIND, 0x3C, 40, buttonChanged);
 
 void buttonChanged(uint8_t state) {
   Serial.println("*");
-  static uint8_t prevState = bounce.lastReading;
+  static uint8_t prevState = bounce.getReading();
   uint8_t changed = state ^ prevState;
   prevState = state;
   

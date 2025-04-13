@@ -13,6 +13,9 @@ private:
 
   static uint8_t bounceCounter;     // Tidmätning för stabilitet
   static uint8_t uThresh;           // Stabilitetsgräns
+  static uint8_t lastReading;       // För att detektera ändringar
+  static uint8_t reading;           // portvärde
+ 
   
   static void (*onStateChangeCallback)(uint8_t);
   static stancePointer currentStance;
@@ -21,12 +24,12 @@ private:
   static stance transient();
   
   // Dummy callback för att undvika nullpointer-kontroll
-  static void dummyCallback(uint8_t state) {reading = state; }
+  static void dummyCallback(uint8_t state) { };
   
 public:
-  static uint8_t reading;  // Publik senaste läsning för användare
-  static uint8_t lastReading;       // För att detektera ändringar
-  
+  static uint8_t getReading(){return lastReading;}; 
+
+
   // Konstruktor
   Debouncer(volatile uint8_t* port, uint8_t mask, uint8_t threshold = 10, 
            void (*callback)(uint8_t) = &Debouncer::dummyCallback);
