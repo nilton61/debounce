@@ -36,6 +36,6 @@ public:
   
   // Timer-interrupt-hanterare
   static void interrupt();
-};
+};//Debouncer class
 
 #endif // DEBOUNCER_H
