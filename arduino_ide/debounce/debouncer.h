@@ -10,7 +10,7 @@ private:
   
   static volatile uint8_t* port;    // Registret vi läser från
   static uint8_t mask;              // Isolerar relevanta bitar
-  static uint8_t lastReading;       // För att detektera ändringar
+
   static uint8_t bounceCounter;     // Tidmätning för stabilitet
   static uint8_t uThresh;           // Stabilitetsgräns
   
@@ -21,10 +21,11 @@ private:
   static stance transient();
   
   // Dummy callback för att undvika nullpointer-kontroll
-  static void dummyCallback(uint8_t state) {}
+  static void dummyCallback(uint8_t state) {reading = state; }
   
 public:
   static uint8_t reading;  // Publik senaste läsning för användare
+  static uint8_t lastReading;       // För att detektera ändringar
   
   // Konstruktor
   Debouncer(volatile uint8_t* port, uint8_t mask, uint8_t threshold = 10, 

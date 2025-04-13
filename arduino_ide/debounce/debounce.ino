@@ -7,8 +7,16 @@ enum Color { RED, YELLOW, GREEN, BLUE };
 const uint8_t switchPin[] = {2, 3, 4, 5};
 const uint8_t ledPin[] = {A0, A1, A2, A3};
 
+void buttonChanged(uint8_t state);
+
+
+// Skapa debouncer-instans för knappar på PIND (digital pins 0-7)
+// som lyssnar på pins 2, 3, 4 och 5 (mask 0x3C = 0b00111100)
+Debouncer bounce(&PIND, 0x3C, 40, buttonChanged);
+
 void buttonChanged(uint8_t state) {
-  static uint8_t prevState = 0;
+  Serial.println("*");
+  static uint8_t prevState = bounce.lastReading;
   uint8_t changed = state ^ prevState;
   prevState = state;
   
@@ -24,12 +32,8 @@ void buttonChanged(uint8_t state) {
   }//for color
 }//button changed
 
-// Skapa debouncer-instans för knappar på PIND (digital pins 0-7)
-// som lyssnar på pins 2, 3, 4 och 5 (mask 0x3C = 0b00111100)
-Debouncer bounce(&PIND, 0x3C, 40, buttonChanged);
-
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
     for(int color = RED; color <= BLUE; color++){
     pinMode(switchPin[color], INPUT);
     pinMode(ledPin[color], OUTPUT);
