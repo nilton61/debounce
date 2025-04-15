@@ -18,10 +18,10 @@ Debouncer::Debouncer(volatile uint8_t* p, uint8_t m, uint8_t threshold, void (*c
   
   TCCR2A = 0;
   TCCR2B = 0;
-  TCCR2A |= (1 << WGM21);   // CTC-läge
-  OCR2A = 159;              // För 10µs interval
-  TCCR2B |= (1 << CS20);    // Ingen prescaler
-  TIMSK2 |= (1 << OCIE2A);  // Aktivera interrupt
+  TCCR2A |= (1 << WGM21);   //CTC
+  OCR2A = 159;              //16 MHz * 159 = 10 us
+  TCCR2B |= (1 << CS20);    //Prescaler = 1 
+  TIMSK2 |= (1 << OCIE2A);  //Aktivate interrupt
   
   lastReading = *port & mask;
   reading = lastReading;
@@ -35,35 +35,27 @@ void Debouncer::interrupt() {
 } // interrupt
 
 Debouncer::stance Debouncer::stable() {
-  reading = *port & mask;
-  
-  if (reading != lastReading) {
-    bounceCounter = 0;
-    onStateChangeCallback(reading);
-    currentStance = &Debouncer::transient;
-  } // if reading changed
-  
-  lastReading = reading;  // Uppdatera alltid lastReading
+  reading = *port & mask;                       //check switces
+  if (reading != lastReading) {                 //enter transient state
+    bounceCounter = 0;                          //reset counter
+    onStateChangeCallback(reading);             //do callback
+    currentStance = &Debouncer::transient;      //change state
+  }//if new reading
+  lastReading = reading;                        //Always update
   return;
 } // stable
 
 Debouncer::stance Debouncer::transient() {
-  bounceCounter++;
-  reading = *port & mask;
-  
-  if (reading != lastReading) {
-    bounceCounter = 0;
-  } // if reading changed
-  else if (bounceCounter > uThresh) {
-    currentStance = &Debouncer::stable;
-  } // else if stable
-  
-  lastReading = reading;  // Uppdatera alltid lastReading
+  bounceCounter++;                              //keep tally
+  reading = *port & mask;                       //check swtiches
+  if (reading != lastReading) bounceCounter = 0;//new value, reset counter
+  //check count treshold for stable state:
+  else if (bounceCounter > uThresh) currentStance = &Debouncer::stable;
+  lastReading = reading;                        //always update
   return;
 } // transient
 
-// Timer2 interrupt-hanterare - denna behöver vara i .cpp-filen
-// men utanför klassen
+//TIMER2 interrupt handler, in file but outside class
 ISR(TIMER2_COMPA_vect) {
   Debouncer::interrupt();
 } // Timer2 interrupt

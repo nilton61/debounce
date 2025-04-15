@@ -1,18 +1,46 @@
 #include <Arduino.h>
+#include <debouncer.h>
 
-// put function declarations here:
-int myFunction(int, int);
+// Färgkonstanter
+enum Color { RED, YELLOW, GREEN, BLUE };
+
+// Korrekt mappning mellan bitar och LEDs
+const uint8_t switchPin[] = {2, 3, 4, 5};
+const uint8_t ledPin[] = {A0, A1, A2, A3};
+
+void buttonChanged(uint8_t state);
+
+
+// Skapa debouncer-instans för knappar på PIND (digital pins 0-7)
+// som lyssnar på pins 2, 3, 4 och 5 (mask 0x3C = 0b00111100)
+Debouncer bounce(&PIND, 0x3C, 40, buttonChanged);
+
+void buttonChanged(uint8_t state) {
+  Serial.println("*");
+  static uint8_t prevState = bounce.getReading();
+  uint8_t changed = state ^ prevState;
+  prevState = state;
+  
+  // Gå igenom alla färger
+  for (int color = RED; color <= BLUE; color++) {
+    int bitMask = (1 << switchPin[color]);
+    
+    // Om biten har ändrats och blivit låg (aktiv)
+    if ((changed & bitMask) && !(state & bitMask)) {
+      int led = ledPin[color];
+      digitalWrite(led, !digitalRead(led)); 
+    }//bit high -> low
+  }//for color
+}//button changed
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
-}
+  Serial.begin(9600);
+    for(int color = RED; color <= BLUE; color++){
+    pinMode(switchPin[color], INPUT);
+    pinMode(ledPin[color], OUTPUT);
+  }//for color
+} // setup
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
+  // Inget att göra här - interrupt sköter allt
+} // loop
